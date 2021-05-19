@@ -1,0 +1,65 @@
+name: rrt
+version: 0.0
+synopsis: Rapidly exploring random trees
+category: Data Structures
+author: Joe Hermaszewski
+maintainer: Joe Hermaszewski <so.random@monoid.al>
+copyright: 2021 Joe Hermaszewski
+github: expipiplus1/rrt
+extra-source-files:
+- .gitignore
+- readme.md
+- default.nix
+
+library:
+  source-dirs: src
+  dependencies:
+  - base       >= 4.8 && < 5
+  - random
+
+ghc-options: -Wall
+
+default-extensions:
+  DataKinds
+  FlexibleContexts
+  GeneralizedNewtypeDeriving
+  LambdaCase
+  QuasiQuotes
+  ScopedTypeVariables
+  TemplateHaskell
+  TypeApplications
+  TypeFamilies
+  TypeOperators
+  ViewPatterns
+
+tests:
+  test:
+    main: Test.hs
+    source-dirs:
+      - test
+    ghc-options:
+      - -threaded
+    dependencies:
+      - QuickCheck
+      - base
+      - rrt
+      - tasty
+      - tasty-quickcheck
+      - tasty-th
+      - random
+      - tasty-hunit
+
+  doctests:
+    main: Doctests.hs
+    other-modules: ""
+    source-dirs:
+      - test/doctest
+    dependencies:
+      - base
+      - doctest
+
+custom-setup:
+ dependencies:
+   - base
+   - Cabal
+   - cabal-doctest >= 1 && <1.1
