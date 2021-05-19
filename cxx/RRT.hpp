@@ -74,7 +74,7 @@ constructDualTreeOutput(const Tree_ &treeX, typename Tree_::VertexIndex iX,
 template <ConfigurationSpace CS,
           typename Tree_ = Tree<typename CS::Reachability, typename CS::Config>>
 std::optional<Path<typename CS::Reachability, typename CS::Config>>
-rrtSearch(const int seed, CS configurationSpace, const unsigned maxIterations,
+rrtSearch(const int seed, CS &configurationSpace, const unsigned maxIterations,
           const typename CS::Config initialConfig,
           const typename CS::Config goalConfig) {
 
@@ -115,7 +115,7 @@ template <ConfigurationSpace CS,
           typename Tree_ = Tree<typename CS::Reachability, typename CS::Config>>
 std::optional<Path<typename CS::Reachability, typename CS::Config>>
 rrtSearchDualTree(
-    const int seed, CS configurationSpace,
+    const int seed, CS &configurationSpace,
     const unsigned maxIterations, // in each iteration at most two trees are
                                   // extended, the number of vertices is bounded
                                   // by two times this many calls to 'step'
@@ -204,7 +204,7 @@ rrtSearchDualTree(
 template <ConfigurationSpace CS,
           typename Tree_ = Tree<typename CS::Reachability, typename CS::Config>>
 std::optional<const typename Tree_::VertexIndex>
-growTree(CS configurationSpace, Tree_ &tree, const typename CS::Config c) {
+growTree(CS &configurationSpace, Tree_ &tree, const typename CS::Config c) {
   const auto [path, dist] = configurationSpace.nearestNeighbor(tree, c);
 
   // If we've found a path to this goal, return it
@@ -221,12 +221,12 @@ growTree(CS configurationSpace, Tree_ &tree, const typename CS::Config c) {
 #include "Euclidian.hpp"
 #include "SpaceModifiers.hpp"
 template std::optional<Path<TwoSpace::Reachability, TwoSpace::Config>>
-rrtSearch<BiasTowardsGoal<TwoSpace>>(const int, BiasTowardsGoal<TwoSpace>,
+rrtSearch<BiasTowardsGoal<TwoSpace>>(const int, BiasTowardsGoal<TwoSpace>&,
                                      const unsigned, const TwoSpace::Config,
                                      const TwoSpace::Config);
 template std::optional<Path<TwoSpace::Reachability, TwoSpace::Config>>
 rrtSearchDualTree<BiasTowardsGoal<TwoSpace>>(const int,
-                                             BiasTowardsGoal<TwoSpace>,
+                                             BiasTowardsGoal<TwoSpace>&,
                                              const unsigned,
                                              const TwoSpace::Config,
                                              const TwoSpace::Config);

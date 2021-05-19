@@ -31,12 +31,9 @@ concept ConfigurationSpace = requires(I cs, typename I::Config c, Tree_ t,
   ->std::same_as<typename I::Config>;
 
   // Tries to move from the initial configuration towards a target
-  // configuration. It returns none or several progress making configurations
-  // along with their proofs of reachability.
-  // It is also given the tree of all currently reachable configurations.
-  { cs.step(t, i, c) }
-  ->std::same_as<void>;
-};
+  // configuration. It extends the tree with none or several progress making
+  // configurations along with their proofs of reachability.
+  { cs.step(t, i, c) } ->std::same_as<void>; };
 
 // A default implementation for `nearestNeighbor` performing a linear scan over
 // all the vertices.

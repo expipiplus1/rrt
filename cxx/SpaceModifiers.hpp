@@ -5,7 +5,7 @@
 
 // This class template will sample the goal configuration some proportion of
 // the time, otherwise the underlying class's sample implementation is used.
-template <ConfigurationSpace CS> class BiasTowardsGoal : private CS {
+template <ConfigurationSpace CS> class BiasTowardsGoal : public CS {
 public:
   // p in [0..1]
   template <typename... Args>

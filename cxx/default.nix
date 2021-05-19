@@ -1,10 +1,10 @@
-{ nixpkgsSrc ? builtins.fetchTarball {
+{ rosOverlay ? builtins.fetchTarball {
   url =
-    "https://github.com/nixos/nixpkgs/archive/83d907fd760d9ee4f49b4b7e4b1c6682f137b573.tar.gz"; # nixos-unstable
-  sha256 = "0qc8gfkbga7v5p8r6h2hbdi8bjl3piikdwcbb9fff5cjnxi7v7qa";
-}, pkgs ? import nixpkgsSrc { } }:
+    "https://github.com/lopsided98/nix-ros-overlay/archive/0d3aca6651c13bca684339a40f6f13d3f90066aa.tar.gz"; # refs/heads/master
+  sha256 = "03wf835iw2clcms7k3panlvc985pca44bsy595c4mpphnvl3dw62";
+}, pkgs ? import rosOverlay {} }:
 
 with pkgs;
 
-mkShell { nativeBuildInputs = [ clang catch2 eigen ]; }
+mkShell { nativeBuildInputs = [ gdb catch2 eigen stb ]; }
 
