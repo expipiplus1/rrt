@@ -1,6 +1,7 @@
 #pragma once
 
 #include <eigen3/Eigen/Dense>
+#include <iterator>
 #include <memory>
 #include <random>
 #include <stb/stb_image.h>
@@ -45,8 +46,7 @@ bresenham4(const Eigen::Vector2i p0, const Eigen::Vector2i p1,
 class BitmapSpace {
 public:
   BitmapSpace(const uint32_t seed, const uint32_t maxSampleAttempts)
-      : imageData(nullptr, stbi_image_free),
-        maxSampleAttempts(maxSampleAttempts) {}
+      : maxSampleAttempts(maxSampleAttempts) {}
   BitmapSpace() = delete;
 
   using Config = Eigen::Vector2i;
@@ -56,12 +56,26 @@ public:
   void load(const std::string &filename) {
     const int desiredComponents = 1;
     int actualComponents;
-    imageData.reset(stbi_load(filename.c_str(), &width, &height,
-                              &actualComponents, desiredComponents));
-    numComponents = desiredComponents;
-    if (!imageData) {
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height,
+                                    &actualComponents, desiredComponents);
+    if (!data) {
       throw std::runtime_error("unable to load " + filename);
     };
+    imageData.reserve(width * height * actualComponents);
+    std::ranges::copy(data, data + width * height * actualComponents,
+                      std::back_inserter(imageData));
+    stbi_image_free(data);
+    numComponents = desiredComponents;
+  }
+
+  template <std::input_iterator I>
+  void loadFromMemory(const int width, const int height, I data) {
+    imageData.reserve(width * height);
+    std::ranges::copy(data, data + width * height,
+                      std::back_inserter(imageData));
+    this->width = width;
+    this->height = height;
+    this->numComponents = 1;
   }
 
   void saveWithPath(const std::string &filename, const Config init,
@@ -149,7 +163,7 @@ public:
   };
 
 private:
-  std::unique_ptr<unsigned char, decltype(*stbi_image_free)> imageData;
+  std::vector<unsigned char> imageData;
   int width;
   int height;
   int numComponents;
@@ -162,7 +176,7 @@ private:
     const int component = 0;
     assert(x < width && "x out of bounds");
     assert(y < height && "y out of bounds");
-    return imageData.get()[(y * width + x) * numComponents + component];
+    return imageData[(y * width + x) * numComponents + component];
   }
   unsigned char occupied(const Config c) const {
     return pixel(c[0], c[1]) != 0xff;
