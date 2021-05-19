@@ -45,6 +45,8 @@ defaultNearestNeighbor(const CS &cs, const Tree_ &tree,
   double best = cs.distance(tree.root, c);
   typename Tree_::VertexIndex bestConfig = Tree_::rootVertex;
 
+  // As much as I keep using <algorithm> for these kinds of jobs, I really feel
+  // that `for` loops have enhanced clarity, ease of writing and error messages!
   for (std::size_t i = 0; i < tree.size(); ++i) {
     const auto n = tree[i];
     const double nDist = cs.distance(n.config, c);

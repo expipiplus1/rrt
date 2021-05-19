@@ -8,7 +8,20 @@ with pkgs;
 with rosPackages.noetic;
 
 mkShell {
-  nativeBuildInputs = [ gdb catch2 eigen stb rosbash xacro rosnode nav-msgs rviz pinta ];
+  nativeBuildInputs = [
+    gdb
+    catch2
+    eigen
+    stb
+    pinta
+    # Ros:
+    rosbash
+    xacro
+    rosnode
+    nav-msgs
+    message-filters
+    rviz
+  ];
 
   ROS_HOSTNAME = "localhost";
   ROS_MASTER_URI = "http://localhost:11311";

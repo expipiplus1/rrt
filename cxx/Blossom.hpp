@@ -6,11 +6,23 @@
 
 #include "ConfigurationSpace.hpp"
 
+//
 // This class template will use a step function which implements Blossom-RRT
+//
+// It is parameterized over the underlying ConfigurationSpace and the type of
+// Iterator for the finite set of path extensions required in the `step`
+// function.
+//
+// This inherits publically from the base class without a virtual destructor,
+// don't delete it via a reference to the parent class, OK? (or downcast in
+// general)
+//
 template <ConfigurationSpace CS, std::ranges::input_range ContRange>
 class Blossom : public CS {
 public:
-  // p in [0..1]
+  //
+  // Forwards constructor arguments to the parent class
+  //
   template <typename... Args>
   Blossom(std::function<ContRange(const Blossom<CS, ContRange> &, Direction,
                                   typename CS::Config, typename CS::Config)>
@@ -24,6 +36,11 @@ public:
   using typename CS::Config;
   using typename CS::Reachability;
 
+  //
+  // The crux of this function is that it will add every point suggested by the
+  // provided continuation function, as long as they're not better reached by
+  // an existing pointk
+  //
   void step(Tree<Reachability, Config> &tree,
             typename Tree<Reachability, Config>::VertexIndex initialIndex,
             Config target) {
@@ -57,7 +74,9 @@ public:
   };
 
 private:
-  std::function<ContRange(const Blossom<CS, ContRange>&, Direction,
+  // The function to get a set of possible path continuations can return any
+  // range iterator.
+  std::function<ContRange(const Blossom<CS, ContRange> &, Direction,
                           typename CS::Config, typename CS::Config)>
       simulations;
 };

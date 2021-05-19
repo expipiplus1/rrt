@@ -17,6 +17,7 @@ enum Direction { Forwards, Backwards };
 // A Sentinal for tree PathIterators
 class PathEndSentinal {};
 
+//
 // A Tree is a collection of paths, it is stored as a list of vertices along
 // with their parent index and proof of reachability `R` from the parent if the
 // direction is `Forwards` or the proof *to* the parent is the direction is
@@ -24,6 +25,7 @@ class PathEndSentinal {};
 //
 // Supports amortized O(1) insertion and O(n) path extraction (nothing
 // surprising here).
+//
 template <typename R, typename C> class Tree {
 public:
   Tree(Direction direction, C root)
@@ -93,6 +95,7 @@ public:
     const Tree *tree;
     VertexIndex i;
   };
+  // Check that we satisfy the `input_iterator` concept.
   static_assert(std::input_iterator<PathIterator>);
 
   //

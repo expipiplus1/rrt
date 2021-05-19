@@ -25,9 +25,6 @@ singleTreeSearch() {
   const TwoSpace::Config goal{1, 1};
 
   const auto ret = rrtSearch(0, twoSpace, 1000, initial, goal);
-  for (const auto &[_, x] : ret.value()) {
-    std::cout << x << std::endl;
-  }
   return ret;
 }
 
@@ -41,9 +38,6 @@ std::optional<Path<TwoSpace::Reachability, TwoSpace::Config>> dualTreeSearch() {
   const TwoSpace::Config goal{1, 1};
 
   const auto ret = rrtSearchDualTree(0, twoSpace, 1000, initial, goal);
-  for (const auto &[_, x] : ret.value()) {
-    std::cout << x << std::endl;
-  }
   return ret;
 }
 
@@ -72,9 +66,6 @@ singleTreeBlossomSearch() {
   const TwoSpace::Config goal{1, 1};
 
   const auto ret = rrtSearch(0, twoSpace, 1000, initial, goal);
-  for (const auto &[_, x] : ret.value()) {
-    std::cout << x << std::endl;
-  }
   return ret;
 }
 
@@ -103,9 +94,6 @@ dualTreeBlossomSearch() {
   const TwoSpace::Config goal{1, 1};
 
   const auto ret = rrtSearchDualTree(0, twoSpace, 1000, initial, goal);
-  for (const auto &[_, x] : ret.value()) {
-    std::cout << x << std::endl;
-  }
   return ret;
 }
 
@@ -124,7 +112,7 @@ bitmapSearch(const std::string &filename) {
 
   const auto ret = rrtSearch(0, space, 1000, initial, goal);
   if (ret.has_value()) {
-    space.saveWithPath("path_" + filename, initial, ret.value());
+    space.saveWithPath("solved_" + filename, initial, ret.value());
   }
   return ret;
 }
@@ -168,7 +156,7 @@ bitmapSearchBlossom(const std::string &filename) {
 
   const auto ret = rrtSearch(0, space, 2000, initial, goal);
   if (ret.has_value()) {
-    space.saveWithPath("path_" + filename, initial, ret.value());
+    space.saveWithPath("solved_" + filename, initial, ret.value());
   }
   return ret;
 }
@@ -178,10 +166,10 @@ TEST_CASE("RRT Search Succeeds") {
   REQUIRE(dualTreeSearch().has_value());
   REQUIRE(singleTreeBlossomSearch().has_value());
   REQUIRE(dualTreeBlossomSearch().has_value());
-  REQUIRE(bitmapSearch("clear.png").has_value());
-  REQUIRE(bitmapSearch("wiggle.png").has_value());
-  REQUIRE(!bitmapSearch("sad.png").has_value());
-  REQUIRE(bitmapSearch("bottlenecks.png").has_value());
-  REQUIRE(bitmapSearchBlossom("tunnel.png").has_value());
-  REQUIRE(bitmapSearchBlossom("rooms.png").has_value());
+  REQUIRE(bitmapSearch("images/clear.png").has_value());
+  REQUIRE(bitmapSearch("images/wiggle.png").has_value());
+  REQUIRE(!bitmapSearch("images/sad.png").has_value());
+  REQUIRE(bitmapSearch("images/bottlenecks.png").has_value());
+  REQUIRE(bitmapSearchBlossom("images/tunnel.png").has_value());
+  REQUIRE(bitmapSearchBlossom("images/rooms.png").has_value());
 }

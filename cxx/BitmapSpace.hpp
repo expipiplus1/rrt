@@ -11,7 +11,13 @@
 #include "ConfigurationSpace.hpp"
 #include "Tree.hpp"
 
-// perPixel can command the function to stop early by returning true;
+//
+// Using the Bresenham algorithm, perform `perPixel` at every pixel between two
+// configurations. `perPixel` can command the function to stop early by
+// returning true;
+//
+// This function paints a contiguous line, with no diagonal movements.
+//
 inline Eigen::Vector2i
 bresenham4(const Eigen::Vector2i p0, const Eigen::Vector2i p1,
            const std::function<bool(Eigen::Vector2i)> &perPixel) {
@@ -43,41 +49,69 @@ bresenham4(const Eigen::Vector2i p0, const Eigen::Vector2i p1,
   return ret;
 }
 
+//
+// A space which only samples and traverses pixels which have value 0xff.
+//
+// TODO: should probably just be a wrapper around `TwoSpace`.
+//
 class BitmapSpace {
 public:
+  //
+  // It will never sample points in untraversable areas, maxSampleAttempts
+  // prevents unbounded loops when there are no traversable pixels.
+  //
   BitmapSpace(const uint32_t seed, const uint32_t maxSampleAttempts)
       : maxSampleAttempts(maxSampleAttempts) {}
   BitmapSpace() = delete;
 
+  // Integral vectors
   using Config = Eigen::Vector2i;
-  // The straight line path between points
+  // The straight line path between points, needs no elaboration
   using Reachability = std::monostate;
 
+  //
+  // Initialize using an image in a file.
+  //
   void load(const std::string &filename) {
     const int desiredComponents = 1;
     int actualComponents;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height,
-                                    &actualComponents, desiredComponents);
+    // Load the image and copy it, it's certainly possible to organize this
+    // without a copy (indeed that's how it was originally written) but it's a
+    // bit neater this way when it has to coexist with `loadFromMemory`
+    const auto data =
+        std::unique_ptr<unsigned char, decltype(&stbi_image_free)>(
+            stbi_load(filename.c_str(), &width, &height, &actualComponents,
+                      desiredComponents),
+            stbi_image_free);
     if (!data) {
       throw std::runtime_error("unable to load " + filename);
     };
     imageData.reserve(width * height * actualComponents);
-    std::ranges::copy(data, data + width * height * actualComponents,
+    std::ranges::copy(data.get(),
+                      data.get() + width * height * actualComponents,
                       std::back_inserter(imageData));
-    stbi_image_free(data);
     numComponents = desiredComponents;
   }
 
-  template <std::input_iterator I>
-  void loadFromMemory(const int width, const int height, I data) {
+  //
+  // Initialize from some data under an input_iterator I
+  //
+  // The iterators must be exactly width*height elements apart
+  //
+  template <std::input_iterator I, std::sentinel_for<I> S>
+  void loadFromMemory(const int width, const int height, I data, S dataEnd) {
     imageData.reserve(width * height);
-    std::ranges::copy(data, data + width * height,
-                      std::back_inserter(imageData));
+    std::ranges::copy(data, dataEnd, std::back_inserter(imageData));
+    assert(imageData.size() == width * height &&
+           "image data iterator wrong size");
     this->width = width;
     this->height = height;
     this->numComponents = 1;
   }
 
+  //
+  // Save our image, along with a red path. For debugging or visualization.
+  //
   void saveWithPath(const std::string &filename, const Config init,
                     const Path<Reachability, Config> &path) const {
     const auto ourComponents = 3;
@@ -126,6 +160,9 @@ public:
     return defaultNearestNeighbor(*this, tree, c);
   };
 
+  //
+  // Never sample an untraversable point
+  //
   Config sample(const Config c) {
     for (uint32_t i = 0; i < maxSampleAttempts; ++i) {
       const auto coord =
@@ -138,6 +175,10 @@ public:
     throw std::runtime_error("unable to find unoccupied pixel");
   }
 
+  //
+  // Cast a ray to a point and move half way towards the nearest obstacle, or
+  // all the way towards an unobstructed target
+  //
   void step(Tree_ &tree, typename Tree_::VertexIndex initial,
             const Config targetConfig) {
     const auto initialConfig = tree.config(initial);
@@ -152,6 +193,9 @@ public:
     }
   }
 
+  //
+  // Some utilities
+  //
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   Config rayCast(const Config p0, const Config p1) const {
@@ -172,6 +216,9 @@ private:
 
   std::mt19937 gen;
 
+  //
+  // Indexing into the image
+  //
   unsigned char pixel(const int x, const int y) const {
     const int component = 0;
     assert(x < width && "x out of bounds");
@@ -183,4 +230,5 @@ private:
   }
 };
 
+// Check we satisfy the ConfigurationSpace concept
 static_assert(ConfigurationSpace<BitmapSpace>);

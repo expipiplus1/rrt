@@ -7,15 +7,16 @@
 #include "ConfigurationSpace.hpp"
 #include "Tree.hpp"
 
+//
 // Euclidian spaces parameterized over scalar type and dimensionality.
 //
-// Points are sampled from the unit n-cube.
+// Points are sampled from [0..1]^D
 //
 // The naive step function (step straight to the configuration) isn't very
-// interesting, so we have a function which:
+// interesting, so we have a function which: If the target configuration is
+// within striking distance, steps straight to it otherwise moves 20% of the
+// way towards the target configuration.
 //
-// If the target configuration is within striking distance, step straight to it
-// otherwise move 20% of the way towards the target configuration.
 template <typename T, int D> class Euclidian {
 public:
   Euclidian(const uint32_t seed)
@@ -23,7 +24,7 @@ public:
       : gen(seed), dis(0, std::nextafter(1, std::numeric_limits<T>::max())) {}
 
   using Config = Eigen::Matrix<T, 1, D>;
-  // The straight line path between points
+  // The straight line path between points doesn't need any explanation
   using Reachability = std::monostate;
 
 private:
@@ -31,6 +32,8 @@ private:
   using Tree_ = Tree<Reachability, Config>;
 
 public:
+  // We rather sneakily use the quadrance here insteaf of the L2-norm to save
+  // an unnecessary square root operation.
   double distance(const Config c1, const Config c2) const {
     return (c1 - c2).squaredNorm();
   };
@@ -41,9 +44,11 @@ public:
   };
 
   Config sample(const Config c) {
+    // This nonsense, not a huge fan of Eigen.
     return Config::NullaryExpr([&]() { return dis(gen); });
   }
 
+  // See comment above
   void step(Tree_ &tree, typename Tree_::VertexIndex initial,
             const Config targetConfig) {
     const auto nearThreshold = 0.1;
@@ -65,5 +70,6 @@ private:
 using TwoSpace = Euclidian<float, 2>;
 using ThreeSpace = Euclidian<float, 3>;
 
+// Some sanity checks
 static_assert(ConfigurationSpace<TwoSpace>);
 static_assert(ConfigurationSpace<ThreeSpace>);
