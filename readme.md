@@ -1,3 +1,12 @@
+A small implementation of Rapidly Exploring Random Trees in Haskell and C++20
+
+See: https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
+
+The C++ implementation has a ROS interface:
+
+![ros screenshot](./readme-content/ros.png)
+
+-------------------------------
 
 A bug in http://www.dgp.toronto.edu/~mac/pubs/rrt-blossom.pdf
 
