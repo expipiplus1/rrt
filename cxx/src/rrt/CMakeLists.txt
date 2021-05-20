@@ -16,4 +16,4 @@ include_directories(
 
 add_executable(rrt main.cpp rrt.cpp)
 set_source_files_properties(rrt.cpp PROPERTIES COMPILE_FLAGS -std=c++2a)
-target_link_libraries(rrt ${catkin_LIBRARIES})
+target_link_libraries(rrt ${catkin_LIBRARIES} atomic)

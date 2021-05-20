@@ -38,6 +38,15 @@ void processMap(ros::Publisher &pub, const geometry_msgs::Point initialConfig,
   ROS_INFO("Finished RRT");
 }
 
+// Why doens't ROS generate a constructor for this...
+geometry_msgs::Point mkPoint(const float x, const float y, const float z) {
+  geometry_msgs::Point ret;
+  ret.x = x;
+  ret.y = y;
+  ret.z = z;
+  return ret;
+}
+
 //
 // Listens on
 //
@@ -51,11 +60,12 @@ int main(int argc, char **argv) {
 
   ros::Publisher pub = n.advertise<nav_msgs::Path>("path", 1);
 
-  geometry_msgs::Point initialConfig;
-  initialConfig.x = initialConfig.y = initialConfig.z = 0;
-  geometry_msgs::Point goalConfig;
-  goalConfig.x = goalConfig.y = 1;
-  goalConfig.z = 0;
+  // TODO: learn about ROS's threading model (can multiple callbacks run
+  // concurrently), better to be on the safe side for now.
+  std::atomic<geometry_msgs::Point> initialConfig;
+  initialConfig.store(mkPoint(0, 0, 0));
+  std::atomic<geometry_msgs::Point> goalConfig;
+  initialConfig.store(mkPoint(1, 1, 0));
 
   auto initSub = n.subscribe<geometry_msgs::Point>(
       "initialConfig", 1,
@@ -65,7 +75,7 @@ int main(int argc, char **argv) {
       [&](const geometry_msgs::Point::ConstPtr msg) { goalConfig = *msg; });
   auto sub = n.subscribe<nav_msgs::OccupancyGrid>(
       "map", 1, [&](const nav_msgs::OccupancyGrid::ConstPtr msg) {
-        processMap(pub, initialConfig, goalConfig, msg);
+        processMap(pub, initialConfig.load(), goalConfig.load(), msg);
       });
 
   ros::spin();
