@@ -1,1 +1,1 @@
-See [../readme.md](../readme.md)
+See the "C++ Imlpementation" section in [../readme.md](../readme.md)
