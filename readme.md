@@ -1,4 +1,4 @@
-A small implementation of Rapidly Exploring Random Trees in Haskell and C++20
+# A small implementation of Rapidly Exploring Random Trees in Haskell and C++20
 
 See: https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
 
